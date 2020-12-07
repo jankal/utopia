@@ -9,7 +9,7 @@ import vhost from 'vhost';
 import bodyParser from 'body-parser';
 import fileType from 'file-type';
 
-const domain = 'zeraton.de';
+const domain = process.env.DOMAIN || 'test.com';
 const deployDir = path.resolve(__dirname, './deploys/');
 const staticDir = path.resolve(__dirname, './static/');
 const liveDir = path.resolve(staticDir, './live');
