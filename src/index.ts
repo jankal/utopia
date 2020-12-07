@@ -28,7 +28,6 @@ const manager = express();
 const app = express();
 
 manager.use(fileUpload({
-  debug: true,
   useTempFiles: true
 }));
 
@@ -46,7 +45,7 @@ async function deployToLive(currentDeployPath: string) {
 async function deployToTest(currentDeployPath: string, deployId: string) {
   const deployLink = path.resolve(staticDir, `./${deployId}/`);
   await util.promisify(fs.symlink)(currentDeployPath, deployLink);
-  app.use(vhost(deployId + domain, express.static(deployLink)));
+  app.use(vhost(`${deployId}.${domain}`, express.static(deployLink)));
 }
 
 manager.post('/deploy', async (req, res) => {
@@ -59,7 +58,6 @@ manager.post('/deploy', async (req, res) => {
   const deployPackage = req.files.file;
 
   const deployZipPath = path.resolve(deployDir, `./${deployId}.zip`);
-  console.log(deployZipPath);
   await deployPackage.mv(deployZipPath);
   if ((await fileType.fromFile(deployZipPath))?.mime !== 'application/zip') {
     res.status(400).send();
@@ -85,7 +83,9 @@ manager.post('/deploy', async (req, res) => {
   }
 
   res.status(201);
-  res.send('Deployed!');
+  res.send(JSON.stringify({
+    deployId
+  }));
 
   return;
 });
@@ -103,7 +103,7 @@ manager.post('/deploy', async (req, res) => {
     }
 
     const deployLink = path.resolve(staticDir, `./${deployId}/`);
-    app.use(vhost(deployId + domain, express.static(deployLink)));
+    app.use(vhost(`${deployId}.${domain}`, express.static(deployLink)));
   }
 
   app.use(vhost(domain, express.static(liveDir)));
