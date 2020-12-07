@@ -108,7 +108,7 @@ manager.post('/deploy', async (req, res) => {
 
   app.use(vhost(domain, express.static(liveDir)));
 
-  app.listen(8080, () => {
-    console.log('Server is listening on 8080.')
+  app.listen(80, () => {
+    console.log('Server is listening on 80.')
   });
 })();
