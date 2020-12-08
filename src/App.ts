@@ -8,7 +8,7 @@ import path from 'path';
 import vhost from 'vhost';
 import { config } from './config';
 import { deployService } from './DeployService';
-import { Deploy } from './Deploy';
+import { deployController } from './DeployController';
 
 export class App {
   manager = express();
@@ -48,6 +48,7 @@ export class App {
 
     this.manager.use(bodyParser.json());
     this.manager.use(bodyParser.urlencoded({extended: true}));
+    this.manager.post('/deploy', deployController.post);
   }
 
   setupApp() {

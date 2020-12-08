@@ -58,3 +58,5 @@ export class DeployController {
     return;
   }
 }
+
+export const deployController = new DeployController();
