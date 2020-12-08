@@ -8,7 +8,7 @@ import vhost from 'vhost';
 import { config } from './config';
 import { deployService } from './DeployService';
 import { deployController } from './DeployController';
-import autoSni from 'auto-sni';
+import createServer from './createServer';
 import { Deploy } from './Deploy';
 
 export class App {
@@ -28,7 +28,7 @@ export class App {
       console.log('Manager is listening on 2242.')
     });
 
-    const appServer = autoSni({
+    const appServer = createServer({
         email: config.email,
         agreeTos: true,
         debug: true,
