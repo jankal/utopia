@@ -15,6 +15,13 @@ export class DeployController {
       return;
     }
 
+    if (config.token !== '') {
+      if (!req.query.token || req.query.token !== config.token) {
+        res.status(403);
+        return;
+      }
+    }
+
     const deployId = randomString();
     const deployPackage = req.files.file;
 
