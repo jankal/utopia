@@ -8,7 +8,7 @@ function makeConfig (baseDir: string) {
     deployDir: path.resolve(baseDir, './deploys/'),
     liveDir: path.resolve(staticDir, './live'),
     domain: process.env.DOMAIN || 'test.com',
-    timeout: 600 // minutes
+    timeout: 60 * 24 * 7 // 7 days (in minutes)
   }
 }
 

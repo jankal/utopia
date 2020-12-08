@@ -57,6 +57,10 @@ export class DeployController {
 
     return;
   }
+
+  get(req: Request, res: Response) {
+    res.json(Object.values(deployService.getDeploys()));
+  }
 }
 
 export const deployController = new DeployController();

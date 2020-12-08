@@ -8,7 +8,7 @@ import { isDeployMetaData } from "./DeployMetaData";
 export const metaFileExtension = '.meta.json';
 
 export class DeployService {
-  activeDeploys: { [id: string]: Deploy | undefined } = {};
+  private activeDeploys: { [id: string]: Deploy | undefined } = {};
 
   private addDeploy(deploySpec: Deploy) {
     this.activeDeploys[deploySpec.id] = deploySpec;
@@ -21,6 +21,10 @@ export class DeployService {
 
   public getDeploy(deployId: string) {
     return this.activeDeploys[deployId] || null;
+  }
+
+  public getDeploys() {
+    return Object.values(this.activeDeploys);
   }
 
   async discoverDeploys() {

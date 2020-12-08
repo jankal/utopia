@@ -48,7 +48,8 @@ export class App {
 
     this.manager.use(bodyParser.json());
     this.manager.use(bodyParser.urlencoded({extended: true}));
-    this.manager.post('/deploy', deployController.post);
+    this.manager.post('/deploys', deployController.post);
+    this.manager.get('/deploys', deployController.get);
   }
 
   setupApp() {
