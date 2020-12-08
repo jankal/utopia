@@ -69,8 +69,9 @@ export class DeployService {
       if (isDeployMetaData(metaData)) {
         const metaCreatedAtDate = new Date(metaData.createdAt)
 
-        if (new Date().getSeconds() - metaCreatedAtDate.getSeconds() > config.timeout * 60) {
-          await util.promisify(fs.unlink)(path.resolve(config.staticDir, `./${metaData.id}/`));
+        const linkPath = path.resolve(config.staticDir, `./${metaData.id}/`);
+        if (new Date().getSeconds() - metaCreatedAtDate.getSeconds() > config.timeout * 60 && this.symbolicLinkExists(linkPath)) {
+          await util.promisify(fs.unlink)(linkPath);
           await util.promisify(fs.rmdir)(path.resolve(config.deployDir, `./${metaData.id}/`));
           await util.promisify(fs.rm)(path.resolve(config.deployDir, `./${metaData.id}.zip`));
 
@@ -81,6 +82,15 @@ export class DeployService {
     }
 
     setTimeout(() => this.removeOldDeploys(), 60 * 1000);
+  }
+
+  async symbolicLinkExists(path: string) {
+    try {
+      const lstatResult = await util.promisify(fs.lstat)(path);
+      return lstatResult.isSymbolicLink();
+    } catch(e) {
+      return false;
+    }
   }
 }
 
