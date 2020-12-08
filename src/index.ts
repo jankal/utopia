@@ -35,12 +35,7 @@ manager.use(bodyParser.json());
 manager.use(bodyParser.urlencoded({extended: true}));
 
 async function deployToLive(currentDeployPath: string) {
-  const liveDirStats = await util.promisify(fs.lstat)(liveDir);
-  if (!liveDirStats.isSymbolicLink()) {
-    await util.promisify(fs.rmdir)(liveDir);
-  } else {
-    await util.promisify(fs.rm)(liveDir);
-  }
+  await util.promisify(fs.rmdir)(liveDir);
   await util.promisify(fs.symlink)(currentDeployPath, liveDir);
 }
 
