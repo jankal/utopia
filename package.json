@@ -26,6 +26,7 @@
     "express-fileupload": "^1.2.0",
     "extract-zip": "^2.0.1",
     "file-type": "^16.0.1",
+    "le-acme-core": "^2.1.4",
     "morgan": "^1.10.0",
     "vhost": "^3.0.2"
   }
