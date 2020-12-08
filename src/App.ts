@@ -46,6 +46,7 @@ export class App {
 
       res.statusCode = 302;
       res.setHeader('location', `https://${req.headers.host}`);
+      res.end();
     }).listen(80, () => {
       console.log('Server is listening on 80.');
       this.obtainCertFor(config.domain, 'live');
