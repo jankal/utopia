@@ -50,13 +50,11 @@ export class App {
   }
 
   async obtainCertFor(hostname: string, deployId: string) {
-    const certPath = path.resolve(config.certDirPath, hostname + '.cert');
+    const certPath = path.resolve(config.certDirPath(hostname), 'fullchain.pem');
     try {
       await fs.stat(certPath);
       return;
     } catch (e) {
-      const keyPath = path.resolve(config.certDirPath, hostname + '.key');
-
       let webRootPath: string;
       if (deployId !== 'live') {
         webRootPath = path.resolve(config.deployDir, `./${deployId}/`);
@@ -69,7 +67,7 @@ export class App {
         }
       }
 
-      const certbotInfo = await util.promisify(exec)(`/usr/bin/certbot certonly -q -d ${hostname} --webroot --preferred-challenges http --agree-tos --email ${config.email} --webroot-path ${webRootPath} --fullchain-path ${certPath} --key-path ${keyPath}`);
+      const certbotInfo = await util.promisify(exec)(`/usr/bin/certbot certonly -q -d ${hostname} --webroot --preferred-challenges http --agree-tos --email ${config.email} --webroot-path ${webRootPath}`);
       console.log(certbotInfo.stdout);
       console.error(certbotInfo.stderr);
       // enable ssl for the vhost
@@ -89,8 +87,8 @@ export class App {
       deployId = regexpResult[0];
     }
     if (servername === config.domain || deployId) {
-      const certPath = path.resolve(config.certDirPath, servername + '.cert');
-      const keyPath = path.resolve(config.certDirPath, servername + '.key');
+      const certPath = path.resolve(config.certDirPath(servername), 'fullchain.pem');
+      const keyPath = path.resolve(config.certDirPath(servername), 'privkey.pem');
       try {
         await fs.stat(certPath)
       } catch (e) {
@@ -108,7 +106,7 @@ export class App {
   }
 
   async ensureBaseDirs() {
-    for (const dir of [config.deployDir, config.staticDir, config.liveDir, config.certDirPath]) {
+    for (const dir of [config.deployDir, config.staticDir, config.liveDir]) {
       try {
         await fs.stat(dir);
       } catch (e) {

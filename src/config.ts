@@ -11,7 +11,7 @@ function makeConfig (baseDir: string) {
     timeout: 60 * 24 * 7, // 7 days (in minutes)
     token: process.env.UTOPIA_TOKEN || '',
     email: 'himself@alexanderjank.de',
-    certDirPath: path.resolve(baseDir, './certs/')
+    certDirPath: (domain: string) => '/etc/letsencrypt/live/' + domain + '/'
   }
 }
 
