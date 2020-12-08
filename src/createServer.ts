@@ -1,5 +1,5 @@
 import path from 'path';
-import LE from 'le-acme-core';
+import LE from 'greenlock-express';
 
 const DEFAULT_DIR = path.join(require('os').homedir(), '/letsencrypt/etc')
 const concat = Array.prototype.concat
@@ -59,6 +59,7 @@ export default function createServer (opts: Options, app?: any) {
   }
 
   return LE.create({
+    version: 'draft-11',
     app: handler,
     debug: opts.debug,
     email: opts.email,

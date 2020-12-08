@@ -1,6 +1,7 @@
-declare module 'le-acme-core' {
+declare module 'greenlock-express' {
   import { Server } from "https";
   interface LeOptions {
+    version?: string,
     app: any;
     debug?: boolean;
     email: string;
