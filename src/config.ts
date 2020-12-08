@@ -10,7 +10,8 @@ function makeConfig (baseDir: string) {
     domain: process.env.DOMAIN || 'test.com',
     timeout: 60 * 24 * 7, // 7 days (in minutes)
     token: process.env.UTOPIA_TOKEN || '',
-    email: 'himself@alexanderjank.de'
+    email: 'himself@alexanderjank.de',
+    certDirPath: path.resolve(baseDir, './certs/')
   }
 }
 

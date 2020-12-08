@@ -1,4 +1,3 @@
-import { App } from './App';
+import { app } from './App';
 
-const app = new App();
 app.start();

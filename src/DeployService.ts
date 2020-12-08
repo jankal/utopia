@@ -1,6 +1,5 @@
 import { Deploy } from "./Deploy";
-import util from 'util';
-import fs from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
 import { config } from './config';
 import { isDeployMetaData } from "./DeployMetaData";
@@ -29,7 +28,7 @@ export class DeployService {
 
   async discoverDeploys() {
     await this.removeOldDeploys();
-    const deploys = await util.promisify(fs.readdir)(config.staticDir);
+    const deploys = await fs.readdir(config.staticDir);
     for (const deployId of deploys) {
       if (deployId === 'live') {
         continue;
@@ -44,18 +43,18 @@ export class DeployService {
   }
 
   public async deployToLive(currentDeployPath: string) {
-    const liveDirStats = await util.promisify(fs.lstat)(config.liveDir);
+    const liveDirStats = await fs.lstat(config.liveDir);
     if (!liveDirStats.isSymbolicLink()) {
-      await util.promisify(fs.rmdir)(config.liveDir);
+      await fs.rmdir(config.liveDir);
     } else {
-      await util.promisify(fs.unlink)(config.liveDir);
+      await fs.unlink(config.liveDir);
     }
-    await util.promisify(fs.symlink)(currentDeployPath, config.liveDir);
+    await fs.symlink(currentDeployPath, config.liveDir);
   }
 
   public async deployToTest(currentDeployPath: string, deployId: string) {
     const deployLink = path.resolve(config.staticDir, `./${deployId}/`);
-    await util.promisify(fs.symlink)(currentDeployPath, deployLink);
+    await fs.symlink(currentDeployPath, deployLink);
 
     this.addDeploy({
       id: deployId,
@@ -64,23 +63,23 @@ export class DeployService {
   }
 
   public async removeOldDeploys() {
-    const deployMetaFiles = (await util.promisify(fs.readdir)(config.deployDir))
+    const deployMetaFiles = (await fs.readdir(config.deployDir))
       .filter((name) => name.substr(name.length - metaFileExtension.length, metaFileExtension.length) === metaFileExtension);
     for (const deployMetaFileName of deployMetaFiles) {
       const metaData = JSON.parse(
-        (await util.promisify(fs.readFile)(path.resolve(config.deployDir, deployMetaFileName))).toString()
+        (await fs.readFile(path.resolve(config.deployDir, deployMetaFileName))).toString()
       );
       if (isDeployMetaData(metaData)) {
         const metaCreatedAtDate = new Date(metaData.createdAt)
 
         const linkPath = path.resolve(config.staticDir, `./${metaData.id}/`);
         if (new Date().getSeconds() - metaCreatedAtDate.getSeconds() > config.timeout * 60 && this.symbolicLinkExists(linkPath)) {
-          await util.promisify(fs.unlink)(linkPath);
-          await util.promisify(fs.rmdir)(path.resolve(config.deployDir, `./${metaData.id}/`));
-          await util.promisify(fs.rm)(path.resolve(config.deployDir, `./${metaData.id}.zip`));
+          await fs.unlink(linkPath);
+          await fs.rmdir(path.resolve(config.deployDir, `./${metaData.id}/`));
+          await fs.rm(path.resolve(config.deployDir, `./${metaData.id}.zip`));
 
           // clean meta-file
-          await util.promisify(fs.rm)(path.resolve(config.deployDir, `./${metaData.id}${metaFileExtension}`));
+          await fs.rm(path.resolve(config.deployDir, `./${metaData.id}${metaFileExtension}`));
         }
       }
     }
@@ -90,7 +89,7 @@ export class DeployService {
 
   async symbolicLinkExists(path: string) {
     try {
-      const lstatResult = await util.promisify(fs.lstat)(path);
+      const lstatResult = await fs.lstat(path);
       return lstatResult.isSymbolicLink();
     } catch(e) {
       return false;

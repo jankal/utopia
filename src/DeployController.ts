@@ -1,12 +1,12 @@
 import { config } from './config';
 import { deployService, metaFileExtension } from './DeployService';
-import util from 'util';
 import path from 'path';
 import extract from 'extract-zip';
-import fs from 'fs';
+import fs from 'fs/promises';
 import fileType from 'file-type';
 import { randomString } from './randomString';
 import { Request, Response } from 'express';
+import { app } from './App';
 
 export class DeployController {
   public async post(req: Request, res: Response) {
@@ -36,31 +36,36 @@ export class DeployController {
     await extract(deployZipPath, { dir: currentDeployPath });
 
     const deployMetaFilePath = path.resolve(config.deployDir, `./${deployId}${metaFileExtension}`)
-    await util.promisify(fs.writeFile)(deployMetaFilePath, JSON.stringify({
+    await fs.writeFile(deployMetaFilePath, JSON.stringify({
       id: deployId,
       md5: deployPackage.md5,
       createdAt: new Date().toISOString()
     }));
 
-    if (Object.prototype.hasOwnProperty.call(req.query, 'env') && typeof req.query.env === 'string') {
-      switch(req.query.env) {
-        case 'live':
-          await deployService.deployToLive(currentDeployPath);
-        break;
+    let target: 'test' | 'live' = 'test';
 
-        case 'test':
-        default:
-          await deployService.deployToTest(currentDeployPath, deployId);
-        break;
-      }
-    } else {
-      await deployService.deployToTest(currentDeployPath, deployId);
+    if (Object.prototype.hasOwnProperty.call(req.query, 'env') && typeof req.query.env === 'string' && req.query.env === 'live') {
+      target = 'live';
+    }
+
+    switch(target) {
+      case 'live':
+        await deployService.deployToLive(currentDeployPath);
+      break;
+
+      case 'test':
+        await deployService.deployToTest(currentDeployPath, deployId);
+      break;
     }
 
     res.status(201);
     res.send(JSON.stringify({
       deployId
     }));
+
+    if (target === 'test') {
+      app.obtainCertFor(deployId + '.' + config.domain, deployId);
+    }
 
     return;
   }
