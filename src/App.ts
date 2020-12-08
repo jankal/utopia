@@ -17,7 +17,6 @@ import { exec } from 'child_process';
 export class App {
   manager = express();
   app = express();
-  sslHosts: string[] = [];
 
   async start() {
     await this.ensureBaseDirs();
@@ -36,8 +35,12 @@ export class App {
     }, this.app).listen(443, () => {
       console.log('Server is listening on 443.')
     });
-    http.createServer((req, res) => {
-      if (!this.sslHosts.includes(req.headers.host as string)) {
+    http.createServer(async (req, res) => {
+      const hostname = req.headers.host as string;
+      const certPath = path.resolve(config.certDirPath(hostname), 'fullchain.pem');
+      try {
+        await fs.stat(certPath);
+      } catch (e) {
         return this.app(req, res);
       }
 
@@ -53,7 +56,6 @@ export class App {
     const certPath = path.resolve(config.certDirPath(hostname), 'fullchain.pem');
     try {
       await fs.stat(certPath);
-      this.sslHosts.push(hostname);
       return;
     } catch (e) {
       let webRootPath: string;
@@ -71,16 +73,10 @@ export class App {
       const certbotInfo = await util.promisify(exec)(`/usr/bin/certbot certonly -q -d ${hostname} --webroot --preferred-challenges http --agree-tos --email ${config.email} --webroot-path ${webRootPath}`);
       console.log(certbotInfo.stdout);
       console.error(certbotInfo.stderr);
-      // enable ssl for the vhost
-      this.sslHosts.push(hostname);
     }
   }
 
   async findCert (servername: string, cb: (err: Error | null, ctx: tls.SecureContext) => void) {
-    if (!this.sslHosts.includes(servername)) {
-      cb(new Error('Host not found!'), tls.createSecureContext());
-    }
-
     const domainExp = new RegExp('^(.*)\.' + config.domain + '$');
     let regexpResult: RegExpExecArray | null;
     let deployId: string | null = null;
@@ -89,12 +85,14 @@ export class App {
     }
     if (servername === config.domain || deployId) {
       const certPath = path.resolve(config.certDirPath(servername), 'fullchain.pem');
-      const keyPath = path.resolve(config.certDirPath(servername), 'privkey.pem');
       try {
         await fs.stat(certPath)
       } catch (e) {
-        await this.obtainCertFor(servername, deployId || 'live');
+        cb(new Error('Host not found!'), tls.createSecureContext());
       }
+
+      const keyPath = path.resolve(config.certDirPath(servername), 'privkey.pem');
+
       const cert = await fs.readFile(certPath);
       const key = await fs.readFile(keyPath);
       return cb(null, tls.createSecureContext({
@@ -102,8 +100,6 @@ export class App {
         key
       }));
     }
-
-    cb(new Error('Host not found!'), tls.createSecureContext());
   }
 
   async ensureBaseDirs() {
