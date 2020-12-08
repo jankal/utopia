@@ -4,11 +4,12 @@ import fs from 'fs';
 import fileUpload from 'express-fileupload';
 import bodyParser from 'body-parser';
 import morgan from 'morgan';
-import path from 'path';
 import vhost from 'vhost';
 import { config } from './config';
 import { deployService } from './DeployService';
 import { deployController } from './DeployController';
+import autoSni from 'auto-sni';
+import { Deploy } from './Deploy';
 
 export class App {
   manager = express();
@@ -26,8 +27,29 @@ export class App {
     this.manager.listen(2242, () => {
       console.log('Manager is listening on 2242.')
     });
-    this.app.listen(80, () => {
-      console.log('Server is listening on 80.')
+
+    const appServer = autoSni({
+        email: config.email,
+        agreeTos: true,
+        debug: true,
+        domains: () => [
+          config.domain,
+          ...deployService.getDeploys()
+            .filter((d): d is Deploy => typeof d !== 'undefined')
+            .map((d: Deploy) => {
+              return `${d.id}.${config.domain}`;
+            })
+        ],
+        dir: "~/letsencrypt/etc",
+        ports: {
+          http: 80, // Optionally override the default http port.
+          https: 443 // // Optionally override the default https port.
+        }
+      },
+      this.app
+    );
+    appServer.once("listening", ()=> {
+      console.log("App-server started.");
     });
   }
 
