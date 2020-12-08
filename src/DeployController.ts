@@ -32,7 +32,7 @@ export class DeployController {
     await util.promisify(fs.writeFile)(deployMetaFilePath, JSON.stringify({
       id: deployId,
       md5: deployPackage.md5,
-      createdAt: new Date().toISOString
+      createdAt: new Date().toISOString()
     }));
 
     if (Object.prototype.hasOwnProperty.call(req.query, 'env') && typeof req.query.env === 'string') {
