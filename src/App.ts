@@ -32,7 +32,7 @@ export class App {
       console.log('Manager is listening on 2242.')
     });
     https.createServer({
-      SNICallback: this.findCert
+      SNICallback: (servername: string, cb: (err: Error | null, ctx: tls.SecureContext) => void) => this.findCert(servername, cb)
     }, this.app).listen(443, () => {
       console.log('Server is listening on 443.')
     });
@@ -53,6 +53,7 @@ export class App {
     const certPath = path.resolve(config.certDirPath(hostname), 'fullchain.pem');
     try {
       await fs.stat(certPath);
+      this.sslHosts.push(hostname);
       return;
     } catch (e) {
       let webRootPath: string;
