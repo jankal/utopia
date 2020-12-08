@@ -101,6 +101,8 @@ export class App {
         key
       }));
     }
+
+    cb(new Error('Host not found!'), tls.createSecureContext());
   }
 
   async ensureBaseDirs() {
