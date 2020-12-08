@@ -69,7 +69,7 @@ export class App {
         }
       }
 
-      const certbotInfo = await util.promisify(exec)(`/usr/bin/certbot certonly -d ${hostname} --webroot --preferred-challenges http --agree-tos --webroot-path ${webRootPath} --fullchain-path ${certPath} --key-path ${keyPath}`);
+      const certbotInfo = await util.promisify(exec)(`/usr/bin/certbot certonly -q -d ${hostname} --webroot --preferred-challenges http --agree-tos --email ${config.email} --webroot-path ${webRootPath} --fullchain-path ${certPath} --key-path ${keyPath}`);
       console.log(certbotInfo.stdout);
       // enable ssl for the vhost
       this.sslHosts.push(hostname);
