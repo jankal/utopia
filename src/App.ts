@@ -44,14 +44,15 @@ export class App {
       res.statusCode = 302;
       res.setHeader('location', `https://${req.headers.host}`);
     }).listen(80, () => {
-      console.log('Server is listening on 80.')
+      console.log('Server is listening on 80.');
+      this.obtainCertFor(config.domain, 'live');
     });
   }
 
   async obtainCertFor(hostname: string, deployId: string) {
     const certPath = path.resolve(config.certDirPath, hostname + '.cert');
     try {
-      await fs.stat(certPath)
+      await fs.stat(certPath);
       return;
     } catch (e) {
       const keyPath = path.resolve(config.certDirPath, hostname + '.key');
