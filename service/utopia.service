@@ -1,0 +1,14 @@
+[Unit]
+Description=Utopia
+After=network.target
+
+[Service]
+Type=simple
+User=
+Environment="DOMAIN=jankal.me"
+WorkingDirectory=/root/utopia/
+ExecStart=/usr/bin/npm run start
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
