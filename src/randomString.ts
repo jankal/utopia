@@ -1,5 +1,5 @@
 export function randomString(length = 8) {
-  let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
 
   let str = '';
   for (let i = 0; i < length; i++) {
