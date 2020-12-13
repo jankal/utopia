@@ -3,7 +3,7 @@ export function randomString(length = 8) {
 
   let str = '';
   for (let i = 0; i < length; i++) {
-      str += chars.charAt(Math.floor(Math.random() * chars.length));
+    str += chars.charAt(Math.floor(Math.random() * chars.length));
   }
 
   return str;
