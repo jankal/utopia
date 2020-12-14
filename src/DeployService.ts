@@ -73,7 +73,7 @@ export class DeployService {
         const metaCreatedAtDate = new Date(metaData.createdAt)
 
         const linkPath = path.resolve(config.staticDir, `./${metaData.id}/`);
-        if (new Date().getSeconds() - metaCreatedAtDate.getSeconds() > config.timeout * 60 && this.symbolicLinkExists(linkPath)) {
+        if (new Date().getSeconds() - metaCreatedAtDate.getSeconds() > config.timeout * 60 && await this.symbolicLinkExists(linkPath)) {
           await fs.unlink(linkPath);
           await fs.rmdir(path.resolve(config.deployDir, `./${metaData.id}/`));
           await fs.rm(path.resolve(config.deployDir, `./${metaData.id}.zip`));
